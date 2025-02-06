@@ -155,6 +155,30 @@ class BookManager(BaseManager):
 
         return super().edit_item()
 
+    def delete_item(self) -> None:
+        tm = self.get_table_model()
+
+        selected_rows = self.get_selection_model().selectedRows()
+        rows = [row.row() for row in selected_rows]
+        rows.sort()
+        deleted_count = 0
+
+        for row in rows:
+            book_id = tm.data(tm.index(row, 0))
+            deleted = db.delete_book(int(book_id))
+            print(book_id)
+
+            if not deleted:
+                QMessageBox.critical(
+                    self,
+                    "Error",
+                    "Error deleting this book. It is being used by a user.",
+                )
+                continue
+
+            self.get_table_model().removeRow(row - deleted_count)
+            deleted_count += 1
+
     def load_data(self) -> list[list[Any]]:
         books = db.get_books()
         data = []

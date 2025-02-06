@@ -7,6 +7,7 @@ from db.functions import create_all
 if __name__ == "__main__":
     create_all()
     app = QApplication(sys.argv)
+    app.setStyle("Fusion")
     w = MainWindow()
     w.show()
     app.exec()

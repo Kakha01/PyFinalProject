@@ -94,6 +94,8 @@ class AuthorManager(BaseManager):
             f"{first_name} {last_name} {author_id}",
         )
 
+        self.edit_item_in_table(row_data)
+
         return super().edit_item()
 
     def load_data(self) -> list[list[Any]]:
