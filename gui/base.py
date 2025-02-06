@@ -176,7 +176,7 @@ class BaseFormView(QWidget):
 
     def display_form(self) -> None:
         # Displays form fields to user except id field
-        for label, input, required in self.form_fields[1:]:
+        for label, input, _ in self.form_fields:
             self.form_layout.addRow(label, input)
 
 
@@ -184,11 +184,8 @@ class BaseManager(QWidget):
     def __init__(self, form_fields: list[FormField]):
         super().__init__()
 
-        for label, input, required in form_fields:
+        for label, _, required in form_fields:
             label.setText(f"{label.text()}{"*" if required else ""}:")
-
-            if isinstance(input, QDateEdit):
-                input.setDisplayFormat("dd.MM.yyyy")
 
         form_fields.insert(0, (QLabel("Id"), QLineEdit(), False))
 

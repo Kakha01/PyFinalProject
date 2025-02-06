@@ -20,18 +20,14 @@ class BookManager(BaseManager):
         self.CATEGORY_COL = 3
         self.form_fields: list[FormField] = [
             (QLabel("Title"), QLineEdit(), True),
-            (QLabel("Author"), QComboBox(), True),
-            (QLabel("Category"), QComboBox(), True),
-            (QLabel("ISBN Number"), QLineEdit(), True),
-            (QLabel("Release Date"), QDateEdit(QDate.currentDate()), True),
+            (QLabel("Author"), self.create_author(), True),
+            (QLabel("Category"), self.create_category(), True),
+            (QLabel("ISBN Number"), self.create_isbn(), True),
+            (QLabel("Release Date"), self.create_date_edit(), True),
             (QLabel("Description"), QTextEdit(), False),
         ]
 
         super().__init__(self.form_fields)
-        self.get_author().addItems(self.load_authors())
-        self.get_category().addItems(self.load_categories())
-        self.get_isbn().setText(uuid.uuid4().hex[:13].upper())
-        self.get_isbn().setReadOnly(True)
 
     def add_category(self, value: str):
         self.get_category().addItem(value)
@@ -200,15 +196,31 @@ class BookManager(BaseManager):
 
         return data
 
-    def load_authors(self):
-        authors = db.get_authors()
-        return [
-            f"{author.first_name} {author.last_name} {author.id}" for author in authors
-        ]
-
-    def load_categories(self):
-        categories = db.get_categories()
-        return [f"{category.name} {category.id}" for category in categories]
-
     def get_isbn(self):
         return cast(QLineEdit, self.form_fields[4][1])
+
+    def create_date_edit(self) -> QDateEdit:
+        date_edit = QDateEdit()
+        date_edit.setDisplayFormat("dd.MM.yyyy")
+        date_edit.setDate(QDate.currentDate())
+        date_edit.setMaximumDate(QDate.currentDate())
+        return date_edit
+
+    def create_isbn(self) -> QLineEdit:
+        isbn = QLineEdit()
+        isbn.setText(uuid.uuid4().hex[:13].upper())
+        isbn.setReadOnly(True)
+        return isbn
+
+    def create_author(self) -> QComboBox:
+        author = QComboBox()
+        authors = db.get_authors()
+        author.addItems([f"{a.first_name} {a.last_name} {a.id}" for a in authors])
+        return author
+
+    def create_category(self) -> QComboBox:
+        category = QComboBox()
+        categories = db.get_categories()
+
+        category.addItems([f"{c.name} {c.id}" for c in categories])
+        return category
