@@ -52,7 +52,7 @@ class BookManager(BaseManager):
                 "hidden_field": False,
             },
             {
-                "label": QLabel("ISBN Number"),
+                "label": QLabel("ISBN"),
                 "input": self.create_isbn(),
                 "required": True,
                 "hidden_col": False,
