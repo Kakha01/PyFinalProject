@@ -36,8 +36,8 @@ class MainWindow(QMainWindow):
         self.author_manager.authorDelete.connect(self.book_manager.delete_author)
         self.author_manager.authorEdit.connect(self.book_manager.edit_author)
 
-        self.tab_widget.addTab(self.book_manager, "Book Manager")
-        self.tab_widget.addTab(self.category_manager, "Category Manager")
-        self.tab_widget.addTab(self.author_manager, "Author Manager")
+        self.tab_widget.addTab(self.book_manager, "📕 Book Manager")
+        self.tab_widget.addTab(self.category_manager, "🔠 Category Manager")
+        self.tab_widget.addTab(self.author_manager, "🧑‍🎨 Author Manager")
 
         self.setCentralWidget(self.tab_widget)

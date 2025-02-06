@@ -146,10 +146,10 @@ class BaseTableView(QWidget):
         for col in hidden_cols:
             self.table_view.setColumnHidden(col, True)
 
-        self.add_button = QPushButton("Add")
-        self.edit_button = QPushButton("Edit")
+        self.add_button = QPushButton("➕ Add")
+        self.edit_button = QPushButton("📝 Edit")
         self.edit_button.setDisabled(True)
-        self.delete_button = QPushButton("Delete")
+        self.delete_button = QPushButton("➖ Delete")
         self.delete_button.setDisabled(True)
 
         self.main_layout = QVBoxLayout(self)
@@ -190,7 +190,7 @@ class BaseFormView(QWidget):
         button_layout = QHBoxLayout()
 
         self.submit_button = QPushButton(submit_button_name)
-        self.cancel_button = QPushButton("Cancel")
+        self.cancel_button = QPushButton("✖️ Cancel")
 
         button_layout.addWidget(self.submit_button)
         button_layout.addWidget(self.cancel_button)
@@ -203,7 +203,7 @@ class BaseFormView(QWidget):
         for i, field in enumerate(self.form_fields):
             if i in self.hidden_fields:
                 continue
-            
+
             label = field["label"]
             input = field["input"]
 
@@ -233,8 +233,8 @@ class BaseManager(QWidget):
 
         self.stacked_layout = QStackedLayout(self)
         self.table_view = BaseTableView(self.load_data(), form_fields, hidden_cols)
-        self.add_form_view = BaseFormView(form_fields, "Add", hidden_fields)
-        self.edit_form_view = BaseFormView(form_fields, "Edit", hidden_fields)
+        self.add_form_view = BaseFormView(form_fields, "➕ Add", hidden_fields)
+        self.edit_form_view = BaseFormView(form_fields, "📝 Edit", hidden_fields)
 
         self.table_view.add_button.clicked.connect(self.display_add_book_view)
         self.table_view.edit_button.clicked.connect(self.display_edit_book_view)
