@@ -203,7 +203,7 @@ class BaseFormView(QWidget):
         for i, field in enumerate(self.form_fields):
             if i in self.hidden_fields:
                 continue
-
+            
             label = field["label"]
             input = field["input"]
 
@@ -316,7 +316,7 @@ class BaseManager(QWidget):
             elif isinstance(input, QComboBox):
                 input.setCurrentIndex(0)
 
-            if label.text() == "ISBN Number*:":
+            if label.text() == "ISBN*:":
                 cast(QLineEdit, input).setText(uuid.uuid4().hex[:13].upper())
 
     def extract_form_data(self) -> list[str]:
