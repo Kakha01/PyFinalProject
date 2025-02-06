@@ -336,6 +336,8 @@ class BaseManager(QWidget):
             elif isinstance(input, QTextEdit):
                 text = input.toPlainText()
 
+            text = text.strip()
+
             if required and text == "":
                 return []
 
