@@ -2,6 +2,7 @@ import sqlalchemy as sa
 from sqlalchemy.orm import sessionmaker, joinedload
 from typing import Optional
 from db.models import Base, Book, Category, Author
+import logging
 
 db = sa.create_engine("sqlite:///data.db")
 Session = sessionmaker(bind=db)
@@ -9,6 +10,7 @@ Session = sessionmaker(bind=db)
 
 def create_all() -> None:
     Base.metadata.create_all(db)
+    logging.info("Database tables created")
 
 
 def add_category(name: str, description: Optional[str]) -> int:
@@ -17,6 +19,7 @@ def add_category(name: str, description: Optional[str]) -> int:
             category = Category(name=name, description=description)
             s.add(category)
             s.commit()
+            logging.info(f"Category added: {name} (ID: {category.id})")
             return category.id
         except Exception:
             return -1
@@ -28,6 +31,7 @@ def delete_category(id: int) -> bool:
             category = s.query(Category).filter_by(id=id).first()
             s.delete(category)
             s.commit()
+            logging.info(f"Category deleted: ID {id}")
             return True
         except Exception:
             return False
@@ -47,6 +51,7 @@ def edit_category(id: int, name: str, description: Optional[str]) -> bool:
                 category.description = description
 
             s.commit()
+            logging.info(f"Category edited: {name} (ID: {id})")
             return True
         except Exception:
             return False
@@ -68,6 +73,7 @@ def add_author(first_name: str, last_name: str, bio: Optional[str]) -> int:
             author = Author(first_name=first_name, last_name=last_name, bio=bio)
             s.add(author)
             s.commit()
+            logging.info(f"Author added: {first_name} {last_name} (ID: {author.id})")
             return author.id
         except Exception:
             return -1
@@ -79,6 +85,7 @@ def delete_author(id: int) -> bool:
             author = s.query(Author).filter_by(id=id).first()
             s.delete(author)
             s.commit()
+            logging.info(f"Author deleted: ID {id}")
             return True
         except Exception:
             return False
@@ -99,6 +106,7 @@ def edit_author(id: int, first_name: str, last_name: str, bio: Optional[str]) ->
                 author.bio = bio
 
             s.commit()
+            logging.info(f"Author edited: {first_name} {last_name} (ID: {id})")
             return True
         except Exception:
             return False
@@ -135,6 +143,7 @@ def add_book(
             s.add(book)
             s.commit()
             s.refresh(book)
+            logging.info(f"Book added: {title} (ID: {book.id})")
 
             book = (
                 s.query(Book)
@@ -154,6 +163,7 @@ def delete_book(id: int) -> bool:
             book = s.query(Book).filter_by(id=id).first()
             s.delete(book)
             s.commit()
+            logging.info(f"Book deleted: ID {id}")
             return True
         except Exception:
             return False
@@ -185,6 +195,7 @@ def edit_book(
                 book.description = description
 
             s.commit()
+            logging.info(f"Book edited: {title} (ID: {id})")
             return True
         except Exception:
             return False

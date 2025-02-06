@@ -1,7 +1,11 @@
-import sys
+import sys, logging
 from PyQt6.QtWidgets import QApplication
 from gui import MainWindow
 from db.functions import create_all
+
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 
 
 if __name__ == "__main__":

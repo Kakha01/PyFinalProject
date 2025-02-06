@@ -1,3 +1,4 @@
+import logging
 from PyQt6.QtWidgets import QMainWindow, QTabWidget
 from PyQt6.QtCore import QSize
 from gui import BookManager, CategoryManager, AuthorManager
@@ -41,3 +42,4 @@ class MainWindow(QMainWindow):
         self.tab_widget.addTab(self.author_manager, "🧑 Author Manager")
 
         self.setCentralWidget(self.tab_widget)
+        logging.info("Main window initialized")
