@@ -143,8 +143,6 @@ def add_book(
                 .first()
             )
 
-            print(book)
-
             return book
         except Exception:
             return None

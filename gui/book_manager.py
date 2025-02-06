@@ -160,7 +160,6 @@ class BookManager(BaseManager):
         data = []
 
         for book in books:
-            print(book.release_date)
             data.append(
                 [
                     book.id,

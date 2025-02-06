@@ -92,8 +92,6 @@ class CategoryManager(BaseManager):
             f"{old_category.name} {old_category.id}", f"{name} {category_id}"
         )
 
-        print(f"{old_category.name} {old_category.id}", f"{name} {category_id}")
-
         self.edit_item_in_table(row_data)
 
         return super().edit_item()
