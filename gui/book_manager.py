@@ -15,8 +15,11 @@ from PyQt6.QtWidgets import (
 
 
 class BookManager(BaseManager):
-    incrementCategory = pyqtSignal(str)
-    decrementCategory = pyqtSignal(str)
+    incrementCategoryBooks = pyqtSignal(str)
+    decrementCategoryBooks = pyqtSignal(str)
+
+    incrementAuthorBooks = pyqtSignal(str)
+    decrementAuthorBooks = pyqtSignal(str)
 
     def __init__(self):
         self.form_fields: list[FormField] = [
@@ -24,7 +27,7 @@ class BookManager(BaseManager):
                 "label": QLabel("ID"),
                 "input": QLineEdit(),
                 "required": False,
-                "hidden_col": False,
+                "hidden_col": True,
                 "hidden_field": True,
             },
             {
@@ -153,7 +156,8 @@ class BookManager(BaseManager):
         ]
 
         self.insert_item_in_table(data)
-        self.incrementCategory.emit(str(category_id))
+        self.incrementCategoryBooks.emit(str(category_id))
+        self.incrementAuthorBooks.emit(str(author_id))
 
         return super().add_item()
 
@@ -176,6 +180,14 @@ class BookManager(BaseManager):
         )
         description = row_data[6]
 
+        old_book = db.get_book(book_id)
+
+        if not old_book:
+            QMessageBox.critical(
+                self, "Error", "An error occurred while editing the book."
+            )
+            return False
+
         book = db.edit_book(
             id=book_id,
             title=title,
@@ -191,6 +203,14 @@ class BookManager(BaseManager):
                 self, "Error", "An error occurred while editing the book."
             )
             return False
+
+        if old_book.category_id != category_id:
+            self.decrementCategoryBooks.emit(str(old_book.category_id))
+            self.incrementCategoryBooks.emit(str(category_id))
+
+        if old_book.author_id != author_id:
+            self.decrementAuthorBooks.emit(str(old_book.author_id))
+            self.incrementAuthorBooks.emit(str(author_id))
 
         self.edit_item_in_table(row_data)
 
@@ -208,9 +228,8 @@ class BookManager(BaseManager):
             row = row - deleted_count
             book_id = tm.data(tm.index(row, 0))
             deleted = db.delete_book(int(book_id))
+            author_id = cast(str, tm.data(tm.index(row, 2))).split(" ")[-1]
             category_id = cast(str, tm.data(tm.index(row, 3))).split(" ")[-1]
-
-            print(book_id)
 
             if not deleted:
                 QMessageBox.critical(
@@ -221,7 +240,8 @@ class BookManager(BaseManager):
                 continue
 
             self.get_table_model().removeRow(row)
-            self.decrementCategory.emit(category_id)
+            self.decrementCategoryBooks.emit(category_id)
+            self.decrementAuthorBooks.emit(author_id)
             deleted_count += 1
 
     def load_data(self) -> list[list[Any]]:

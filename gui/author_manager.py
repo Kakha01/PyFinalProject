@@ -40,7 +40,15 @@ class AuthorManager(BaseManager):
                 "hidden_col": False,
                 "hidden_field": False,
             },
+            {
+                "label": QLabel("Books"),
+                "input": QLineEdit(),
+                "required": False,
+                "hidden_col": False,
+                "hidden_field": True,
+            },
         ]
+
         super().__init__(self.form_fields)
 
     def add_item(self) -> bool:
@@ -49,7 +57,7 @@ class AuthorManager(BaseManager):
         if not row_data:
             return False
 
-        _, first_name, last_name, bio = row_data
+        _, first_name, last_name, bio, _ = row_data
 
         author_id = db.add_author(first_name, last_name, bio)
 
@@ -58,7 +66,7 @@ class AuthorManager(BaseManager):
 
         self.authorAdd.emit(f"{first_name} {last_name} {author_id}")
 
-        self.insert_item_in_table([author_id, first_name, last_name, bio])
+        self.insert_item_in_table([author_id, first_name, last_name, bio, 0])
 
         return super().add_item()
 
@@ -71,7 +79,7 @@ class AuthorManager(BaseManager):
 
         for row in rows:
             row = row - deleted_count
-            
+
             author_id = tm.data(tm.index(row, 0))
             author_name = tm.data(tm.index(row, 1))
             author_last_name = tm.data(tm.index(row, 2))
@@ -86,7 +94,6 @@ class AuthorManager(BaseManager):
 
             self.authorDelete.emit(f"{author_name} {author_last_name} {author_id}")
             self.get_table_model().removeRow(row)
-
             deleted_count += 1
 
     def edit_item(self) -> bool:
@@ -130,6 +137,32 @@ class AuthorManager(BaseManager):
         data = []
 
         for author in authors:
-            data.append([author.id, author.first_name, author.last_name, author.bio])
+            data.append(
+                [
+                    author.id,
+                    author.first_name,
+                    author.last_name,
+                    author.bio,
+                    len(author.books),
+                ]
+            )
 
         return data
+
+    def increment_author_books(self, author_id: str) -> None:
+        tm = self.get_table_model()
+
+        for row in range(tm.rowCount()):
+            if tm.data(tm.index(row, 0)) == author_id:
+                count = int(tm.data(tm.index(row, 4)))
+                tm.setData(tm.index(row, 4), count + 1)
+                break
+
+    def decrement_author_books(self, author_id: str) -> None:
+        tm = self.get_table_model()
+
+        for row in range(tm.rowCount()):
+            if tm.data(tm.index(row, 0)) == author_id:
+                count = int(tm.data(tm.index(row, 4)))
+                tm.setData(tm.index(row, 4), count - 1)
+                break

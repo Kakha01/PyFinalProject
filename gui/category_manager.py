@@ -134,7 +134,7 @@ class CategoryManager(BaseManager):
 
         return data
 
-    def increment_category(self, category_id: str) -> None:
+    def increment_category_books(self, category_id: str) -> None:
         tm = self.get_table_model()
 
         for row in range(tm.rowCount()):
@@ -143,7 +143,7 @@ class CategoryManager(BaseManager):
                 tm.setData(tm.index(row, 3), count + 1)
                 break
 
-    def decrement_category(self, category_id: str) -> None:
+    def decrement_category_books(self, category_id: str) -> None:
         tm = self.get_table_model()
 
         for row in range(tm.rowCount()):

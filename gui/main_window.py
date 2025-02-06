@@ -17,11 +17,17 @@ class MainWindow(QMainWindow):
         self.category_manager = CategoryManager()
         self.author_manager = AuthorManager()
 
-        self.book_manager.incrementCategory.connect(
-            self.category_manager.increment_category
+        self.book_manager.incrementCategoryBooks.connect(
+            self.category_manager.increment_category_books
         )
-        self.book_manager.decrementCategory.connect(
-            self.category_manager.decrement_category
+        self.book_manager.incrementAuthorBooks.connect(
+            self.author_manager.increment_author_books
+        )
+        self.book_manager.decrementCategoryBooks.connect(
+            self.category_manager.decrement_category_books
+        )
+        self.book_manager.decrementAuthorBooks.connect(
+            self.author_manager.decrement_author_books
         )
         self.category_manager.categoryAdd.connect(self.book_manager.add_category)
         self.category_manager.categoryDelete.connect(self.book_manager.delete_category)

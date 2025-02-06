@@ -111,7 +111,7 @@ def get_author(id: int) -> Author | None:
 
 def get_authors() -> list[Author]:
     with Session() as s:
-        return s.query(Author).all()
+        return s.query(Author).options(joinedload(Author.books)).all()
 
 
 def add_book(
@@ -188,6 +188,16 @@ def edit_book(
             return True
         except Exception:
             return False
+
+
+def get_book(id: int) -> Book | None:
+    with Session() as s:
+        return (
+            s.query(Book)
+            .options(joinedload(Book.author), joinedload(Book.category))
+            .filter_by(id=id)
+            .first()
+        )
 
 
 def get_books() -> list[Book]:
