@@ -1,4 +1,4 @@
-from typing import Any, cast, Tuple
+from typing import Any, cast, Tuple, TypedDict
 import uuid
 
 from PyQt6.QtWidgets import (
@@ -24,7 +24,13 @@ from PyQt6.QtCore import (
     QItemSelectionModel,
 )
 
-FormField = Tuple[QLabel, QWidget, bool]
+
+class FormField(TypedDict):
+    label: QLabel
+    input: QWidget
+    required: bool
+    hidden_col: bool
+    hidden_field: bool
 
 
 class BaseModel(QAbstractTableModel):
@@ -32,9 +38,14 @@ class BaseModel(QAbstractTableModel):
         super().__init__()
         self._data = data or []
         self.headerColumns = [
-            field.text()[:-2] if required else field.text()[:-1]
-            for field, _, required in form_fields
+            (
+                field["label"].text()[:-2]
+                if field["required"]
+                else field["label"].text()[:-1]
+            )
+            for field in form_fields
         ]
+
         self._column_count = len(self.headerColumns)
 
     def rowCount(self, parent: QModelIndex = QModelIndex()) -> int:
@@ -115,7 +126,12 @@ class BaseModel(QAbstractTableModel):
 
 
 class BaseTableView(QWidget):
-    def __init__(self, data: list[list[Any]], form_fields: list[FormField]) -> None:
+    def __init__(
+        self,
+        data: list[list[Any]],
+        form_fields: list[FormField],
+        hidden_cols: list[int],
+    ) -> None:
         super().__init__()
         self.table_view = QTableView()
         self.table_view_model = BaseModel(data, form_fields)
@@ -126,7 +142,9 @@ class BaseTableView(QWidget):
         )
         self.selection_model.selectionChanged.connect(self.manage_button_states)
         self.table_view.horizontalHeader().setStretchLastSection(True)  # type: ignore
-        self.table_view.setColumnHidden(0, True)
+
+        for col in hidden_cols:
+            self.table_view.setColumnHidden(col, True)
 
         self.add_button = QPushButton("Add")
         self.edit_button = QPushButton("Edit")
@@ -155,11 +173,17 @@ class BaseTableView(QWidget):
 
 
 class BaseFormView(QWidget):
-    def __init__(self, form_fields: list[FormField], submit_button_name: str) -> None:
+    def __init__(
+        self,
+        form_fields: list[FormField],
+        submit_button_name: str,
+        hidden_fields: list[int],
+    ) -> None:
         super().__init__()
         layout = QVBoxLayout(self)
         self.form_layout = QFormLayout()
         self.form_layout.setLabelAlignment(Qt.AlignmentFlag.AlignRight)
+        self.hidden_fields = hidden_fields
 
         self.form_fields = form_fields
 
@@ -176,7 +200,13 @@ class BaseFormView(QWidget):
 
     def display_form(self) -> None:
         # Displays form fields to user except id field
-        for label, input, _ in self.form_fields:
+        for i, field in enumerate(self.form_fields):
+            if i in self.hidden_fields:
+                continue
+
+            label = field["label"]
+            input = field["input"]
+
             self.form_layout.addRow(label, input)
 
 
@@ -184,15 +214,27 @@ class BaseManager(QWidget):
     def __init__(self, form_fields: list[FormField]):
         super().__init__()
 
-        for label, _, required in form_fields:
+        hidden_cols = []
+        hidden_fields = []
+
+        for i, field in enumerate(form_fields):
+            label = field["label"]
+            required = field["required"]
+            hidden_col = field["hidden_col"]
+            hidden_field = field["hidden_field"]
+
             label.setText(f"{label.text()}{"*" if required else ""}:")
 
-        form_fields.insert(0, (QLabel("Id"), QLineEdit(), False))
+            if hidden_col:
+                hidden_cols.append(i)
+
+            if hidden_field:
+                hidden_fields.append(i)
 
         self.stacked_layout = QStackedLayout(self)
-        self.table_view = BaseTableView(self.load_data(), form_fields)
-        self.add_form_view = BaseFormView(form_fields, "Add")
-        self.edit_form_view = BaseFormView(form_fields, "Edit")
+        self.table_view = BaseTableView(self.load_data(), form_fields, hidden_cols)
+        self.add_form_view = BaseFormView(form_fields, "Add", hidden_fields)
+        self.edit_form_view = BaseFormView(form_fields, "Edit", hidden_fields)
 
         self.table_view.add_button.clicked.connect(self.display_add_book_view)
         self.table_view.edit_button.clicked.connect(self.display_edit_book_view)
@@ -227,9 +269,9 @@ class BaseManager(QWidget):
             data = self.get_table_model().data(index, Qt.ItemDataRole.DisplayRole)
             row_data.append(data)
 
-        for (_, input, required), data in zip(
-            self.edit_form_view.form_fields, row_data
-        ):
+        for field, data in zip(self.edit_form_view.form_fields, row_data):
+            input = field["input"]
+
             if isinstance(input, QLineEdit):
                 input.setText(data)
             elif isinstance(input, QDateEdit):
@@ -263,7 +305,10 @@ class BaseManager(QWidget):
         self.reset_form_fields()
 
     def reset_form_fields(self) -> None:
-        for label, input, _ in self.add_form_view.form_fields:
+        for field in self.add_form_view.form_fields:
+            label = field["label"]
+            input = field["input"]
+
             if isinstance(input, QLineEdit) or isinstance(input, QTextEdit):
                 input.clear()
             elif isinstance(input, QDateEdit):
@@ -277,7 +322,10 @@ class BaseManager(QWidget):
     def extract_form_data(self) -> list[str]:
         row_data: list[str] = []
 
-        for _, input, required in self.add_form_view.form_fields:
+        for field in self.add_form_view.form_fields:
+            input = field["input"]
+            required = field["required"]
+
             text = ""
             if isinstance(input, QLineEdit):
                 text = input.text()

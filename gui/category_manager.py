@@ -12,8 +12,34 @@ class CategoryManager(BaseManager):
 
     def __init__(self):
         self.form_fields: list[FormField] = [
-            (QLabel("Name"), QLineEdit(), True),
-            (QLabel("Description"), QTextEdit(), False),
+            {
+                "label": QLabel("ID"),
+                "input": QLineEdit(),
+                "required": False,
+                "hidden_col": True,
+                "hidden_field": True,
+            },
+            {
+                "label": QLabel("Name"),
+                "input": QLineEdit(),
+                "required": True,
+                "hidden_col": False,
+                "hidden_field": False,
+            },
+            {
+                "label": QLabel("Description"),
+                "input": QTextEdit(),
+                "required": False,
+                "hidden_col": False,
+                "hidden_field": False,
+            },
+            {
+                "label": QLabel("Books"),
+                "input": QLineEdit(),
+                "required": False,
+                "hidden_col": False,
+                "hidden_field": True,
+            },
         ]
         super().__init__(self.form_fields)
 
@@ -23,7 +49,7 @@ class CategoryManager(BaseManager):
         if not row_data:
             return False
 
-        _, name, description = row_data
+        _, name, description, _ = row_data
 
         category_id = db.add_category(name, description)
 
@@ -32,7 +58,7 @@ class CategoryManager(BaseManager):
 
         self.categoryAdd.emit(f"{name} {category_id}")
 
-        self.insert_item_in_table([category_id, name, description])
+        self.insert_item_in_table([category_id, name, description, 0])
 
         return super().add_item()
 
@@ -45,6 +71,7 @@ class CategoryManager(BaseManager):
         deleted_count = 0
 
         for row in rows:
+            row = row - deleted_count
             category_id = tm.data(tm.index(row, 0))
             category_name = tm.data(tm.index(row, 1))
             deleted = db.delete_category(int(category_id))
@@ -58,7 +85,7 @@ class CategoryManager(BaseManager):
                 continue
 
             self.categoryDelete.emit(f"{category_name} {category_id}")
-            self.get_table_model().removeRow(row - deleted_count)
+            self.get_table_model().removeRow(row)
             deleted_count += 1
 
     def edit_item(self):
@@ -70,7 +97,7 @@ class CategoryManager(BaseManager):
             )
             return False
 
-        category_id, name, description = row_data
+        category_id, name, description, _ = row_data
 
         old_category = db.get_category(int(category_id))
 
@@ -101,6 +128,26 @@ class CategoryManager(BaseManager):
         data = []
 
         for category in categories:
-            data.append([category.id, category.name, category.description])
+            data.append(
+                [category.id, category.name, category.description, len(category.books)]
+            )
 
         return data
+
+    def increment_category(self, category_id: str) -> None:
+        tm = self.get_table_model()
+
+        for row in range(tm.rowCount()):
+            if tm.data(tm.index(row, 0)) == category_id:
+                count = int(tm.data(tm.index(row, 3)))
+                tm.setData(tm.index(row, 3), count + 1)
+                break
+
+    def decrement_category(self, category_id: str) -> None:
+        tm = self.get_table_model()
+
+        for row in range(tm.rowCount()):
+            if tm.data(tm.index(row, 0)) == category_id:
+                count = int(tm.data(tm.index(row, 3)))
+                tm.setData(tm.index(row, 3), count - 1)
+                break

@@ -59,7 +59,7 @@ def get_category(id: int) -> Category | None:
 
 def get_categories() -> list[Category]:
     with Session() as s:
-        return s.query(Category).all()
+        return s.query(Category).options(joinedload(Category.books)).all()
 
 
 def add_author(first_name: str, last_name: str, bio: Optional[str]) -> int:

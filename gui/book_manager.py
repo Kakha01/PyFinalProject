@@ -1,5 +1,5 @@
 from gui.base import BaseManager, FormField
-from PyQt6.QtCore import QDate
+from PyQt6.QtCore import QDate, pyqtSignal
 from typing import Any, cast
 import db.functions as db
 import uuid
@@ -15,16 +15,60 @@ from PyQt6.QtWidgets import (
 
 
 class BookManager(BaseManager):
+    incrementCategory = pyqtSignal(str)
+    decrementCategory = pyqtSignal(str)
+
     def __init__(self):
-        self.AUTHOR_COL = 2
-        self.CATEGORY_COL = 3
         self.form_fields: list[FormField] = [
-            (QLabel("Title"), QLineEdit(), True),
-            (QLabel("Author"), self.create_author(), True),
-            (QLabel("Category"), self.create_category(), True),
-            (QLabel("ISBN Number"), self.create_isbn(), True),
-            (QLabel("Release Date"), self.create_date_edit(), True),
-            (QLabel("Description"), QTextEdit(), False),
+            {
+                "label": QLabel("ID"),
+                "input": QLineEdit(),
+                "required": False,
+                "hidden_col": False,
+                "hidden_field": True,
+            },
+            {
+                "label": QLabel("Title"),
+                "input": QLineEdit(),
+                "required": True,
+                "hidden_col": False,
+                "hidden_field": False,
+            },
+            {
+                "label": QLabel("Author"),
+                "input": self.create_author(),
+                "required": True,
+                "hidden_col": False,
+                "hidden_field": False,
+            },
+            {
+                "label": QLabel("Category"),
+                "input": self.create_category(),
+                "required": True,
+                "hidden_col": False,
+                "hidden_field": False,
+            },
+            {
+                "label": QLabel("ISBN Number"),
+                "input": self.create_isbn(),
+                "required": True,
+                "hidden_col": False,
+                "hidden_field": False,
+            },
+            {
+                "label": QLabel("Release Date"),
+                "input": self.create_date_edit(),
+                "required": True,
+                "hidden_col": False,
+                "hidden_field": False,
+            },
+            {
+                "label": QLabel("Description"),
+                "input": QTextEdit(),
+                "required": False,
+                "hidden_col": False,
+                "hidden_field": False,
+            },
         ]
 
         super().__init__(self.form_fields)
@@ -44,11 +88,11 @@ class BookManager(BaseManager):
         category.setItemText(index, new_value)
         # Change category name in table too
         for row in range(tm.rowCount()):
-            if tm.data(tm.index(row, self.CATEGORY_COL)) == old_value:
-                tm.setData(tm.index(row, self.CATEGORY_COL), new_value)
+            if tm.data(tm.index(row, 3)) == old_value:
+                tm.setData(tm.index(row, 3), new_value)
 
-    def get_category(self):
-        return cast(QComboBox, self.form_fields[self.CATEGORY_COL][1])
+    def get_category(self) -> QComboBox:
+        return cast(QComboBox, self.form_fields[3]["input"])
 
     def add_author(self, value: str):
         self.get_author().addItem(value)
@@ -65,11 +109,11 @@ class BookManager(BaseManager):
         author.setItemText(index, new_value)
         # Change author name in table too
         for row in range(tm.rowCount()):
-            if tm.data(tm.index(row, self.AUTHOR_COL)) == old_value:
-                tm.setData(tm.index(row, self.AUTHOR_COL), new_value)
+            if tm.data(tm.index(row, 2)) == old_value:
+                tm.setData(tm.index(row, 2), new_value)
 
-    def get_author(self):
-        return cast(QComboBox, self.form_fields[self.AUTHOR_COL][1])
+    def get_author(self) -> QComboBox:
+        return cast(QComboBox, self.form_fields[2]["input"])
 
     def add_item(self) -> bool:
         row_data = self.extract_form_data()
@@ -109,6 +153,7 @@ class BookManager(BaseManager):
         ]
 
         self.insert_item_in_table(data)
+        self.incrementCategory.emit(str(category_id))
 
         return super().add_item()
 
@@ -160,8 +205,11 @@ class BookManager(BaseManager):
         deleted_count = 0
 
         for row in rows:
+            row = row - deleted_count
             book_id = tm.data(tm.index(row, 0))
             deleted = db.delete_book(int(book_id))
+            category_id = cast(str, tm.data(tm.index(row, 3))).split(" ")[-1]
+
             print(book_id)
 
             if not deleted:
@@ -172,7 +220,8 @@ class BookManager(BaseManager):
                 )
                 continue
 
-            self.get_table_model().removeRow(row - deleted_count)
+            self.get_table_model().removeRow(row)
+            self.decrementCategory.emit(category_id)
             deleted_count += 1
 
     def load_data(self) -> list[list[Any]]:
@@ -195,9 +244,6 @@ class BookManager(BaseManager):
             )
 
         return data
-
-    def get_isbn(self):
-        return cast(QLineEdit, self.form_fields[4][1])
 
     def create_date_edit(self) -> QDateEdit:
         date_edit = QDateEdit()

@@ -9,13 +9,20 @@ class MainWindow(QMainWindow):
         super().__init__()
 
         self.setWindowTitle("Library Management System")
-        self.setFixedSize(QSize(500, 500))
+        self.setMinimumSize(QSize(500, 500))
+        self.setMaximumSize(QSize(800, 600))
         self.tab_widget = QTabWidget(self)
 
         self.book_manager = BookManager()
         self.category_manager = CategoryManager()
         self.author_manager = AuthorManager()
 
+        self.book_manager.incrementCategory.connect(
+            self.category_manager.increment_category
+        )
+        self.book_manager.decrementCategory.connect(
+            self.category_manager.decrement_category
+        )
         self.category_manager.categoryAdd.connect(self.book_manager.add_category)
         self.category_manager.categoryDelete.connect(self.book_manager.delete_category)
         self.category_manager.categoryEdit.connect(self.book_manager.edit_category)

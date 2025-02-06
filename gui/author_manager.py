@@ -12,9 +12,34 @@ class AuthorManager(BaseManager):
 
     def __init__(self):
         self.form_fields: list[FormField] = [
-            (QLabel("First Name"), QLineEdit(), True),
-            (QLabel("Last Name"), QLineEdit(), True),
-            (QLabel("Biography"), QTextEdit(), False),
+            {
+                "label": QLabel("ID"),
+                "input": QLineEdit(),
+                "required": False,
+                "hidden_col": True,
+                "hidden_field": True,
+            },
+            {
+                "label": QLabel("First Name"),
+                "input": QLineEdit(),
+                "required": True,
+                "hidden_col": False,
+                "hidden_field": False,
+            },
+            {
+                "label": QLabel("Last Name"),
+                "input": QLineEdit(),
+                "required": True,
+                "hidden_col": False,
+                "hidden_field": False,
+            },
+            {
+                "label": QLabel("Bio"),
+                "input": QTextEdit(),
+                "required": False,
+                "hidden_col": False,
+                "hidden_field": False,
+            },
         ]
         super().__init__(self.form_fields)
 
@@ -45,6 +70,8 @@ class AuthorManager(BaseManager):
         deleted_count = 0
 
         for row in rows:
+            row = row - deleted_count
+            
             author_id = tm.data(tm.index(row, 0))
             author_name = tm.data(tm.index(row, 1))
             author_last_name = tm.data(tm.index(row, 2))
@@ -58,7 +85,7 @@ class AuthorManager(BaseManager):
                 continue
 
             self.authorDelete.emit(f"{author_name} {author_last_name} {author_id}")
-            self.get_table_model().removeRow(row - deleted_count)
+            self.get_table_model().removeRow(row)
 
             deleted_count += 1
 
