@@ -105,7 +105,7 @@ class AuthorManager(BaseManager):
             )
             return False
 
-        author_id, first_name, last_name, bio = row_data
+        author_id, first_name, last_name, bio, _ = row_data
 
         old_author = db.get_author(int(author_id))
 
