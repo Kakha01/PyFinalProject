@@ -1,3 +1,6 @@
+from typing import Any, cast, Tuple
+import uuid
+
 from PyQt6.QtWidgets import (
     QWidget,
     QTableView,
@@ -12,6 +15,7 @@ from PyQt6.QtWidgets import (
     QStackedLayout,
     QComboBox,
 )
+
 from PyQt6.QtCore import (
     Qt,
     QAbstractTableModel,
@@ -19,8 +23,6 @@ from PyQt6.QtCore import (
     QDate,
     QItemSelectionModel,
 )
-from typing import Any, cast, Tuple
-import uuid
 
 FormField = Tuple[QLabel, QWidget, bool]
 

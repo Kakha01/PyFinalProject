@@ -3,7 +3,7 @@ from sqlalchemy.orm import sessionmaker, joinedload
 from typing import Optional
 from db.models import Base, Book, Category, Author
 
-db = sa.create_engine("sqlite:///management.db")
+db = sa.create_engine("sqlite:///data.db")
 Session = sessionmaker(bind=db)
 
 

@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import QLabel, QLineEdit, QTextEdit, QMessageBox
+from gui.base import BaseManager, FormField
 from PyQt6.QtCore import pyqtSignal
 import db.functions as db
-from .base import BaseManager, FormField
 from typing import Any
 
 

@@ -1,3 +1,9 @@
+from gui.base import BaseManager, FormField
+from PyQt6.QtCore import QDate
+from typing import Any, cast
+import db.functions as db
+import uuid
+
 from PyQt6.QtWidgets import (
     QLabel,
     QLineEdit,
@@ -6,11 +12,6 @@ from PyQt6.QtWidgets import (
     QTextEdit,
     QMessageBox,
 )
-from PyQt6.QtCore import QDate
-from typing import Any, cast
-import uuid
-import db.functions as db
-from gui.base import BaseManager, FormField
 
 
 class BookManager(BaseManager):
